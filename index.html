@@ -1,0 +1,326 @@
+<meugabtxt id="rtxt-01" onfocus="sinalizarParenteses(this)" onmouseup="corrigirPorSelecao(this)" contenteditable="true" style="white-space: pre-line; border-width: 5px; border-style: inset; color: grey; resize: both; overflow: auto; background: white; width: 500px; height: 100px; font-size: 13px; display: block;">           <b style="color:Green;">([p₁₆=680]) ([p₂₅=540]) ([p₃₄=350]) ([V₁=0,05]) ([V₂=0,27]) ([V₃=0,58]) ([V₄=0,77]) ([V₅=0,83]) ([V₆=0,91]) ([n=0,12]) ([T₅₆=280])<br></b><b style="color:black;">a: </b>ABS(r{a}/(     (p₁₆*V₁)/(p₂₅*V₂)     )-1)&lt;1%<br><b style="color:black;">b: </b>ABS(r{b}/(     (p₃₄*V₃)/(8,31*n)     )-1)&lt;2%<br><b style="color:black;">c: </b>ABS(r{c}/(     (p₂₅*V₅ + p₁₆*V₆)/(8,31*T₅₆)     )-1)&lt;2%<br><b style="color:red;">BQ:182</b></meugabtxt>
+
+<script> 
+  // Escapa texto para uso seguro em regex
+  function escapeRegex(str) {                 //console.log("escapeRegex");
+    return str.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&');
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  // Inicialização ao focar em qualquer <meugabtxt>
+  function sinalizarParenteses(container) {               //  console.log("sinalizarParenteses");
+    // Extrai definições de variáveis [key=val] do texto original
+    if (!container._vars) {
+      container._vars = {};
+      const text = container.textContent;
+      // regex reDef: captura tudo entre '[' e ']', antes e depois do '='
+      const reDef = /\[([^=\]]+)=([^\]]+)\]/gu;
+      let m;
+      while ((m = reDef.exec(text))) {
+        // m[1]: chave (variável), m[2]: valor (com vírgula decimal)
+        container._vars[m[1].trim()] = m[2].replace(',', '.');
+      }
+    }
+
+    // Envolve parênteses em spans somente uma vez
+    if (!container.querySelector('.par')) {
+      container.innerHTML = container.innerHTML.replace(/([()])/g,
+        '<span class="par">$1</span>');
+      const spans = Array.from(container.querySelectorAll('.par'));
+      const pairs = {}, stack = [];
+      spans.forEach((el, i) => {
+        if (el.textContent === '(') stack.push(i);
+        else {
+          const open = stack.pop();
+          if (open !== undefined) {
+            pairs[open] = i;
+            pairs[i] = open;
+          }
+        }
+      });
+      spans.forEach((el, i) => {
+        el.addEventListener('mouseover', () => {
+          el.classList.add('highlight');
+          const mate = pairs[i];
+          if (mate !== undefined) spans[mate].classList.add('highlight');
+        });
+        el.addEventListener('mouseout', () => {
+          el.classList.remove('highlight');
+          const mate = pairs[i];
+          if (mate !== undefined) spans[mate].classList.remove('highlight');
+        });
+      });
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  // Corrige seleção e cria balão de resultado
+  function corrigirPorSelecao(elemento) { // console.log("corrigirPorSelecao");
+
+
+   // Extrai definições de variáveis [key=val] do texto original
+    //if (!elemento._vars) {
+      elemento._vars = {};
+      const text = elemento.textContent;
+      // regex reDef: captura tudo entre '[' e ']', antes e depois do '='
+      const reDef = /\[([^=\]]+)=([^\]]+)\]/gu;
+      let m;
+      while ((m = reDef.exec(text))) {
+        // m[1]: chave (variável), m[2]: valor (com vírgula decimal)
+        elemento._vars[m[1].trim()] = m[2].replace(',', '.');
+      //}
+    }
+
+
+    let selecao = window.getSelection().toString().trim();
+    if (!selecao) return;
+
+    // Substitui variáveis definidas em container._vars
+    const vars = elemento._vars || {};
+    Object.keys(vars).forEach(key => {
+      const val = vars[key];
+      /* regex de variáveis:
+         (?<![\p{L}\d_])   -> não precedido por letra, dígito ou '_'
+         ${escapeRegex(key)} -> nome da variável (escapado)
+         (?![\p{L}\d_])    -> não seguido por letra, dígito ou '_'
+         Isso garante que até variáveis com 'θ' sejam capturadas exatamente. */
+      const re = new RegExp(`(?<![\\p{L}\\d_])${escapeRegex(key)}(?![\\p{L}\\d_])`, 'gu');
+      selecao = selecao.replace(re, val);
+    });
+
+    // Converte vírgulas decimais para pontos
+    selecao = selecao.replace(/,(?=\d)/g, '.');
+
+    // Converte função de planilha para JS e avalia
+    const expr = funcaoSheetToJS(selecao);
+    
+    
+    
+      ///////////////////////////////////////////////FUNÇÕES DE PLANILHA EM JS////////////////////////////////////////////////
+      //Declaração como variáveis das FUNÇÕES DE PLANILHA EM JS chamada pelo js_funções a serem calculado com eval()
+        //    js_NOME       = (recebe) =>  texto da função usando o que 'recebe'
+        const js_PI         = ()       =>  Math.PI, 
+              js_EXP        = (v)      =>  Math.exp(v), 
+              js_ABS        = (v)      =>  Math.abs(v), 
+              js_SIN        = (v)      =>  Math.sin(v), 
+              js_COS        = (v)      =>  Math.cos(v), 
+              js_TAN        = (v)      =>  Math.tan(v), 
+              js_ASIN       = (v)      =>  Math.asin(v), 
+              js_ACOS       = (v)      =>  Math.acos(v), 
+              js_ATAN       = (v)      =>  Math.atan(v), 
+              js_SEC        = (v)      =>  1 / Math.cos(v), 
+              js_CSC        = (v)      =>  1 / Math.sin(v), 
+              js_COT        = (v)      =>  1 / Math.tan(v), 
+              js_SQRT       = (v)      =>  Math.sqrt(v), 
+              js_TEXT = (v, fmt) => {  // Funciona só para coisas do tipo (que era o que pracisava): TEXT(2.3;"0.00E+0");
+                const m = /^0(?:\.([0]+))?E\+([0]+)$/i.exec(fmt);
+                if (!m) throw new Error("Formato não suportado (use algo como '0.00E+00')");
+                const frac = m[1] ? m[1].length : 0;
+                const expDigits = m[2].length;
+
+                // usa toExponential para obter mantissa + expoente (JS usa '.' como decimal)
+                const s = v.toExponential(frac).toUpperCase(); // ex: "1.23E+4" ou "1.23E-4"
+                const [mant, expPart] = s.split('E');
+                const sign = expPart[0]; // '+' ou '-'
+                const num = expPart.slice(1).padStart(expDigits, '0');
+
+                return `${mant}E${sign}${num}`;
+                },
+              js_LN         = (v)      =>  Math.log(v), 
+              js_LOG10      = (v)      =>  Math.log10(v), 
+              js_VALUE      = (v)      =>  parseFloat(v),      
+              js_LOG        = (v,b)    =>  Math.log(v) / Math.log(b),
+              js_ROUND      = (v,c=0)  => {const m = Math.pow(10,c);return Math.round(v*m)/m;},  //"c=0" se não declarado  
+              js_ROUNDUP    = (v,c=0)  => {const m = Math.pow(10,c);return Math.ceil(v*m)/m;}, 
+              js_ROUNDDOWN  = (v,c=0)  => {const m = Math.pow(10,c);return Math.floor(v*m)/m;};
+          //  const js_COT = (v1)       => { return 1 / Math.tan(v1);};        //Declarar função de forma alternativa
+          // const js_VALUE = (v1)     => {if (isNaN(parseFloat(v1))) {console.log(`Erro: Não foi possível converter  para um número.`);}return parseFloat(v1);};      //Value
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+    
+    
+    try { valor = eval(expr); } catch (e) { return; }
+
+    // Formata número em pt-BR
+    if (typeof valor === 'number' && valor % 1 !== 0) {
+      const dec = valor.toString().split('.')[1].length;
+      valor = valor.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    }
+
+    criarBalaoNaSelecao(valor);
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // Cria balão próximo à seleção
+  function criarBalaoNaSelecao(valor) {                     //  console.log("criarBalaoNaSelecao");
+    const sel = window.getSelection(); if (!sel.rangeCount) return;
+    const rect = sel.getRangeAt(0).getBoundingClientRect();
+    const balao = document.createElement('div');
+    balao.textContent = valor;
+    balao.style.cssText = `position:absolute; top:${rect.top+window.pageYOffset-30}px; left:${rect.left+window.pageXOffset}px; background:lightblue; padding:5px; border:1px solid #000; border-radius:5px; z-index:9999; cursor:pointer;`;
+    balao.addEventListener('click', () => balao.remove());
+    document.body.appendChild(balao);
+  }
+
+  // Placeholder: converte funções de planilha para JS
+function funcaoSheetToJS(eqSheet   /*,indice*/){                      //console.log("funcaoSheetToJS");
+
+    //Transforma em texto a equação e substitui "," por "." || ";" por "," ||"=" por "==" ||"&" por "+" || "<>" por "!="
+    var eqSheetSemParen = String(eqSheet).replaceAll(/(\d),(\d)|(\w*)%|;|TRUE|FALSE|=|\^|&|<>/g, (match, p1, p2, p3) => {
+        if (p1 !== undefined && p2 !== undefined) {
+            return `${p1}.${p2}`;
+        } else if (match === ';') {
+            return ',';
+        } else if (match === 'TRUE') {
+            return 'true';
+        } else if (match === 'FALSE') {
+            return 'false';
+        } else if (match === '=') {
+            return '==';
+        } else if (match == '&') {
+            return '+'; 
+        } else if (match === '<>') {
+            return '!='; 
+        } else if (match === '^') {
+            return '**'; 
+        } else if (p3 !== undefined) {
+            return `(${p3}/100)`;
+        }
+    });           
+
+
+
+      //Substitui parêntesis entre "" por "⦏⦑" ou "⦒⦐", isso para não serem reconhecidos como função
+      var aspas = eqSheetSemParen.match(/"[^"]*?"/g);
+      if(aspas != null){                        //console.log(aspas);
+      aspas.forEach(function(item,index){if(item.match(/\(|\)/g)!=null){eqSheetSemParen = eqSheetSemParen.replaceAll(item,(item.replaceAll("(","⦏⦑")).replaceAll(")","⦒⦐"))}}); 
+      }
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////Desmontar equação em funções////////////////////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //Número de parêntesis encontrados é o número de ciclos de extração de funções, e array de funções extraídas que serão transformadas em JS
+      var numParentesis = ((eqSheetSemParen.match(/[A-Za-z]*\(/g)||0).length || 0), arrayFuncaoSimples = [];  
+      //console.log("numParentesis: "+numParentesis);                   //aaaaa = aaaaa +indice+" "+numParentesis+" ";  
+      // Extração de funções e substituição por "ᶠᵘⁿNᶜᵃᵒ"
+      for(var t = 0; t < numParentesis ; t++){                          //console.log("Eq."+(indice+1)+": "+eqSheetSemParen);
+
+        var funcaoSimples = eqSheetSemParen.match(/[A-Za-z]*\([^()]*\)/g)[0];  // console.log("funcaoSimples: "+funcaoSimples);
+
+
+        eqSheetSemParen = eqSheetSemParen.replace(funcaoSimples,"ᶠᵘⁿ"+t+"ᶜᵃᵒ");  //console.log(eqSheetSemParen);
+
+
+        // funcaoSimples = funcaoSimples.toUpperCase();
+        var nomeFuncao = (funcaoSimples.match(/^(.*?)\(/)[1]).toUpperCase();    //console.log("nomeFuncao: "+nomeFuncao);
+
+        //Configurar para demais funções
+        switch (nomeFuncao) { 
+          case  "OR":                  
+            funcaoSimples=(funcaoSimples.replace(/^(OR|or)\(/g,"((")).replaceAll(",",")||(")+")";
+          break; 
+          case  "AND":                  
+            funcaoSimples=(funcaoSimples.replace(/^(AND|and)\(/g,"((")).replaceAll(",",")&&(")+")";
+          break; 
+          case  "IF":       
+            funcaoSimples = funcaoSimples.replace(/(IF|if)\((.*?),(.*?),(.*?)\)/g,"(($2)?($3):($4))");
+            funcaoSimples = funcaoSimples.replace(/(IF|if)\((.*?),(.*?)\)/g,"(($2)?($3):(false))");
+          break;  
+          case  "IFS":            
+            funcaoSimples = '(' + funcaoSimples.replaceAll(/(^(IFS|ifs)\(|)(.*?),(.*?)(,|\))/g,"($3)?($4):" ) + '"")';
+          break; 
+          case  "":                  
+          //Manter essa oção vazia
+          break; 
+          default:                        
+            funcaoSimples = "js_" + funcaoSimples;     //console.log(eqSheetSemParen) 
+          break;        };
+
+        
+
+        //Recoloca os parêntesis entre aspas 
+        if(aspas != null){  funcaoSimples = (funcaoSimples.replaceAll("⦏⦑","(")).replaceAll("⦒⦐",")"); };
+
+        //Cria um array com cada função retirada e o espaço para substituí-la de volta: "ᶠᵘⁿ1ᶜᵃᵒ"
+        arrayFuncaoSimples.push(funcaoSimples);                                     
+      }
+      //Coloca por no array último a função completa com os "ᶠᵘⁿ1ᶜᵃᵒ"
+        arrayFuncaoSimples.push(eqSheetSemParen);
+    
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////Remontar funções de volta na equação com _js//////////////////////////////////
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      //Último termo do array de funções que será substituido pelos termos anteriores
+      var ultimo = arrayFuncaoSimples.length-1;
+      var equacaoFinal = arrayFuncaoSimples[ultimo];
+
+      for(var i = ultimo; i >= 0; i--){equacaoFinal = equacaoFinal.replaceAll("ᶠᵘⁿ"+i+"ᶜᵃᵒ",arrayFuncaoSimples[i]); }
+
+    //console.log([indice + 26 , eqSheet, equacaoFinal , arrayFuncaoSimples])       //  [provisório, equação original pra vizualizar, equação de saída, passos da substituição pra visualizar]  
+
+        return   equacaoFinal;             
+    }
+
+
+        </script>   
+      
+     
+      
