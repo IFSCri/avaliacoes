@@ -786,9 +786,9 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
 
 
-<div style="display:block;background:rgba(200, 200, 200, 0.5);">  
+<div style="display:none;background:rgba(200, 200, 200, 0.5);">  
     
-    <button type="button" value='Clique para enviar JSON específico' onclick='atualizarTabela()'>Clique para enviar JSON: 
+    <button type="button" value='Clique para enviar JSON específico' onclick='inicio()'>Clique para enviar JSON: 
       <div id="mensagemResposta" style="background-color: #3cb94f;"></div>
       <div id="mensagemTeste" style="background-color: red;"></div>
     </button>
@@ -921,7 +921,7 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
   <script>
 
     // Substitua sua função 'inicio' e a chamada 'inicio()' no final do script por isto:
-console.log("GG")
+
   // 1. Inicializa o cliente do Google com suas configurações
   google.accounts.id.initialize({
     client_id: "90142364675-oeo4houafkfl9sj6fcbqt71injv8v3jj.apps.googleusercontent.com",
@@ -1069,12 +1069,12 @@ if (savedCredential) {console.log("Já logado anteriormente!")
 
 function inicio() { 
 
-  console.log("autenticador: "+ localStorage.getItem('autenticador')+"\ntoken: "+ localStorage.getItem('google_credential'))
+//   console.log("autenticador: "+ localStorage.getItem('autenticador')+"\ntoken: "+ localStorage.getItem('google_credential'))
 
   let autenticador = localStorage.getItem('autenticador'),token = localStorage.getItem('google_credential'),usuario = location.search.slice(1);
   
   enviarArray(  
-    function(tabelaDadosQEA){          console.log("tabelaDadosQEA: "+tabelaDadosQEA);
+    function(tabelaDadosQEA){        //  console.log("tabelaDadosQEA: "+tabelaDadosQEA);
       if(tabelaDadosQEA){telaInicial(tabelaDadosQEA);
       document.getElementById("deixarSessao").style.display = "block";
       document.getElementById("botaoLogin").style.display = "none";
@@ -1189,7 +1189,7 @@ function telaInicial(tabelaDadosQEA) {//
 function enviarArray(funcaoQueRecebeDeVolta) {//alert(funcaoQueRecebeDeVolta)
 
   //Diz para o HTML se ele pertence ao GAS ou se é um HTML externo (aí loga pela API do Google)
-  let externoOuGAS =  "<?!= treco ?>";console.log("externoOuGAS: "+ externoOuGAS);
+  let externoOuGAS =  "<?!= treco ?>";//console.log("externoOuGAS: "+ externoOuGAS);
   if(externoOuGAS == "true"){
 
 
@@ -1226,8 +1226,8 @@ function enviarArray(funcaoQueRecebeDeVolta) {//alert(funcaoQueRecebeDeVolta)
 
 
 
-  }else{console.log("HTML externo");
-    console.log("ID Token recebido não modificável chamada de fora:", window.id_token); //here
+  }else{//console.log("HTML externo");
+    //console.log("ID Token recebido não modificável chamada de fora:", window.id_token); //here
 
 
 
@@ -1244,7 +1244,7 @@ function enviarArray(funcaoQueRecebeDeVolta) {//alert(funcaoQueRecebeDeVolta)
 //////////id: se não tiver "id_token" do Google envia do link "https://www.......?padrao" o texto: "padrao".
 let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //CORRIGIR: excluir opção "padrao"
 		    let jsonParaEnviar = { tipo: funcao, dados: dadosDoHTML, id:  usuario, autenticador: localStorage.getItem('autenticador')  };
-console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
+//console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
 		//document.getElementById('output').innerText = JSON.stringify(jsonParaEnviar);
 		
 		
@@ -1276,7 +1276,7 @@ console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
               return response.json();
           })
           .then(data => {  ////////////Volta de dados//////////
-              console.log('Resposta do GAS:', data);
+             // console.log('Resposta do GAS:', data);
               if (data.status === "success") { ////////////////// Exibe os dados retornados pelo GAS se der certo./////////
                 // document.getElementById("user-info").innerHTML = data.email;
 
@@ -1584,7 +1584,7 @@ function avaliarQEA(){  // google.script.run.withSuccessHandler(  function(m){  
 </div>
   </div>
   
-  <div style="width:205;float:right;">
+  <div style="width:205;float:right;"> 
 
 
   	<div style="padding-right:5px;" onclick="showagenda()"><img style="width:200px;" src="https://i.ibb.co/c3m64mW/Hor-rio-de-atendimento.png" alt="Horário de atendimento"></div>
