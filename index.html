@@ -75,7 +75,7 @@ html, body {
 }
 
 /*Formatação do botão*/
-.button {display: none;padding: 1px 2px;font-size: 24px;cursor: pointer;text-align: center;text-decoration: none;outline: none;color: #efd8aa;background-color: #543414;border-color: #b08c58;border-radius: 10px;box-shadow: 0 9px #0e0f09;position: absolute;bottom: 45px;right: 100px;line-height:30%;padding-top: 9px;}
+.button {display: none;padding: 1px 2px;font-size: 24px;cursor: pointer;text-align: center;text-decoration: none;outline: none;color: #efd8aa;background-color: #543414;border-color: #b08c58;border-radius: 10px;box-shadow: 0 9px #0e0f09;position: fixed;bottom: 45px;right: 100px;line-height:30%;padding-top: 9px;}
 .button:hover {background-color: #3e8e41}
 .button:active {background-color: #3e8e41; box-shadow: 0 3px #0e0f09; transform: translateY(4px);}
 
@@ -1287,7 +1287,7 @@ let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //COR
               } 
               else { ///////////// Exibe os dados retornados pelo GAS se der errado./////////
                   mensagemRespostaDiv.innerHTML = `Erro: ${data.message || 'Ocorreu um problema ao processar a resposta.'}`;
-                  console.log(`Erro: ${data.message || 'Ocorreu um problema ao processar a resposta.'}`);
+                  //console.log(`Erro: ${data.message || 'Ocorreu um problema ao processar a resposta.'}`);
               }
           })
           .catch(error => {  /////////////Exibe erros se caso nem envie/////////////
@@ -1995,7 +1995,7 @@ document.getElementById("avaliacaoAberta").innerHTML = `<!----Informações sobr
     
  <!----- Botão chama função salvarRespostas(submeter ao formulário) --->               <!----Notificação de respostas não salvas--->
   <button type="submit" id="submit_button" class="button"  onclick="if((this.value<new Date())&&(document.getElementById('mailselected')==null)){alert('Já terminou o prazo de envio!');this.style.display = 'none';}else{salvarRespostas();}" ><div id='respnaosalva'></div>"</button>   
-  <div id="whats" style="position: absolute;bottom:25px;right: 30px;float: right;padding-right:5px;"><a href="https://api.whatsapp.com/send?phone=5548936184720&text=Professor,%20me%20ajuda.%20%20Tenho%20dúvida%20em%20..." target="_blank"><img style="width:30px;" src="https://i.ibb.co/jWKgQGv/Whats.png" ></a></div>    <!----- Exibir whats para ajuda ---> `;
+  <div id="whats" style="position: fixed;bottom:25px;right: 30px;float: right;padding-right:5px;"><a href="https://api.whatsapp.com/send?phone=5548936184720&text=Professor,%20me%20ajuda.%20%20Tenho%20dúvida%20em%20..." target="_blank"><img style="width:30px;" src="https://i.ibb.co/jWKgQGv/Whats.png" ></a></div>    <!----- Exibir whats para ajuda ---> `;
   // var nlista = 1;
   // var turma = 'Pa';        
   // var nlista = document.getElementById("nlista").value;
