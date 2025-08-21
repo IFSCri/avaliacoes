@@ -786,7 +786,7 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
 
 
-<div style="display:none;background:rgba(200, 200, 200, 0.5);">  
+<div id="controleInicio" style="display:none;background:rgba(200, 200, 200, 0.5);">  
     
     <button type="button" value='Clique para enviar JSON específico' onclick='inicio()'>Clique para enviar JSON: 
       <div id="mensagemResposta" style="background-color: #3cb94f;"></div>
@@ -1262,8 +1262,15 @@ let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //COR
           const formData = new FormData();
           // É crucial converter o objeto JSON em uma string para enviá-lo corretamente via FormData.
           formData.append('payloadJson', JSON.stringify(jsonParaEnviar));
-          //CORRIGIR (antigo: "https://script.google.com/macros/s/AKfycbwXoNqeebjQiEdjBjVKjfd9qd2_5OkXy3SgUXZ0EfngU-tP54Y_VItDtlrGzYJMqqUe/exec")
-          fetch("https://script.google.com/macros/s/AKfycbxDThRMVCzfJ3OfCsclwMryNiQ5YGHAwxXy5eXYFKOjC4Sk10cKZtFEuLS6ws_xGsctBA/exec", {
+                  
+          const teste = (location.search.slice(1) == "teste"), 
+                back = (teste)?"https://script.google.com/macros/s/AKfycbxBz7h3pmIJll6C_YRgy3wmVz54kuy6cuajYwwSN1PjTSFp4Uo84xiAhT720_XhyMf4/exec":
+                            "https://script.google.com/macros/s/AKfycbxDThRMVCzfJ3OfCsclwMryNiQ5YGHAwxXy5eXYFKOjC4Sk10cKZtFEuLS6ws_xGsctBA/exec";
+          if(teste) {document.getElementById("controleInicio").style.display = "block";}
+
+          console.log(back)
+
+          fetch(back, {
               method: 'POST',
               body: formData
           })
