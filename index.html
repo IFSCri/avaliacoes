@@ -1268,7 +1268,7 @@ let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //COR
                             "https://script.google.com/macros/s/AKfycbxDThRMVCzfJ3OfCsclwMryNiQ5YGHAwxXy5eXYFKOjC4Sk10cKZtFEuLS6ws_xGsctBA/exec";
           if(teste) {document.getElementById("controleInicio").style.display = "block";}
 
-          console.log(back)
+        //   console.log(back)
 
           fetch(back, {
               method: 'POST',
@@ -2077,7 +2077,7 @@ function questions(htmldosheet) {
   sub.style.display = "block";  //Mostrar botão SUBMIT
  
   //Validade da lista (contador regressivo)  ==> Se a validade estiver expirada e se encontra o "mailselected" (aí é o chefe)
-  if((htmldosheet[3][0]<new Date())&&(document.getElementById("mailselected")==null)){
+  if((new Date(htmldosheet[3][0])<new Date())&&!(document.getElementById("opcoes_mail"))){
     // var viewButton = {"display":"none"},noEditPerg = {"pointer-events":"none","opacity":"0.2"};
     Object.assign(sub.style, {"display":"none"});
     Object.assign(perguntas.style, {"pointer-events":"none","opacity":"0.2"});
