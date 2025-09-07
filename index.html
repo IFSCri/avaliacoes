@@ -798,7 +798,8 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
     <button  onclick="inicio()">tabela inicial</button>
     <button  onclick='console.log([localStorage.getItem("autenticador"),localStorage.getItem("google_credential")])' >ver autenticador e token</button> 
-    <button  onclick='localStorage.setItem("autenticador", "GlMbADwZDRBxES0AQRYGDlhaTBEGQ0kHGkMSAEtIQ34wQ0QoE6SNUVlME1RQ8ohQV0xdW1JSSmE2OD1yRlJZb1VFKUIRq8AEWkVCNQxIEazOH1INAUFvN0wXqsuvxAJATnw=");' >guardar autenticador</button> 
+    <button  onclick='const autentic = document.getElementById("autentic").value;localStorage.setItem("autenticador", autentic);' >guardar autenticador</button> 
+        <input id="autentic" value="GlMbADwZDRBxES0AQRYGDlhaTBEGQ0kHGkMSAEtIQ34wQ0QoE6SNUVlME1RQ8ohQV0xdW1JSSmE2OD1yRlJZb1VFKUIRq8AEWkVCNQxIEazOH1INAUFvN0wXqsuvxAJATnw=">
     <button  onclick='localStorage.removeItem("autenticador");localStorage.removeItem("google_credential");' >remover autenticador e token</button> 
 </div>
 
@@ -3277,6 +3278,8 @@ document.addEventListener('keydown', function(event) {
       //Declaração como variáveis das FUNÇÕES DE PLANILHA EM JS chamada pelo js_funções a serem calculado com eval()
         //    js_NOME       = (recebe) =>  texto da função usando o que 'recebe'
         const js_PI         = ()       =>  Math.PI, 
+              js_RADIANS    = (v)      =>  (v * Math.PI) / 180, 
+              js_DEGREES    = (v)      =>  (v * 180) / Math.PI, 
               js_EXP        = (v)      =>  Math.exp(v), 
               js_ABS        = (v)      =>  Math.abs(v), 
               js_SIN        = (v)      =>  Math.sin(v), 
@@ -3289,19 +3292,28 @@ document.addEventListener('keydown', function(event) {
               js_CSC        = (v)      =>  1 / Math.sin(v), 
               js_COT        = (v)      =>  1 / Math.tan(v), 
               js_SQRT       = (v)      =>  Math.sqrt(v), 
-              js_TEXT       = (v, fmt) => {  // Funciona só para coisas do tipo (que era o que pracisava): TEXT(2.3;"0.00E+0");
-                const m = /^0(?:\.([0]+))?E\+([0]+)$/i.exec(fmt);
-                if (!m) throw new Error("Formato não suportado (use algo como '0.00E+00')");
-                const frac = m[1] ? m[1].length : 0;
-                const expDigits = m[2].length;
+              js_TEXT       = (v, fmt) => {  // Suporta ex: TEXT(2.3;"0.00E+00") e TEXT(2.345;"0.00")
+                const sci = /^0(?:\.([0]+))?E\+([0]+)$/i.exec(fmt);
+                if (sci) {
+                    const frac = sci[1] ? sci[1].length : 0;
+                    const expDigits = sci[2].length;
+                    const s = Number(v).toExponential(frac).toUpperCase(); // ex: "-1.23E+4"
+                    let [mant, expPart] = s.split('E');
+                    const sign = expPart[0]; // '+' ou '-'
+                    const num = expPart.slice(1).padStart(expDigits, '0');
+                    mant = mant.replace('.', ','); // usa ',' como separador decimal
+                    return `${mant}E${sign}${num}`;
+                }
 
-                // usa toExponential para obter mantissa + expoente (JS usa '.' como decimal)
-                const s = v.toExponential(frac).toUpperCase(); // ex: "1.23E+4" ou "1.23E-4"
-                const [mant, expPart] = s.split('E');
-                const sign = expPart[0]; // '+' ou '-'
-                const num = expPart.slice(1).padStart(expDigits, '0');
+                const fixed = /^0(?:\.([0]+))?$/i.exec(fmt);
+                if (fixed) {
+                    const frac = fixed[1] ? fixed[1].length : 0;
+                    // toFixed já arredonda corretamente
+                    const s = Number(v).toFixed(frac);
+                    return s.replace('.', ','); // usa ',' como separador decimal
+                }
 
-                return `${mant}E${sign}${num}`;
+                throw new Error("Formato não suportado (use algo como '0.00' ou '0.00E+00')");
                 },
               js_LN         = (v)      =>  Math.log(v), 
               js_LOG10      = (v)      =>  Math.log10(v), 
@@ -3309,7 +3321,63 @@ document.addEventListener('keydown', function(event) {
               js_LOG        = (v,b)    =>  Math.log(v) / Math.log(b),
               js_ROUND      = (v,c=0)  => {const m = Math.pow(10,c);return Math.round(v*m)/m;},  //"c=0" se não declarado  
               js_ROUNDUP    = (v,c=0)  => {const m = Math.pow(10,c);return Math.ceil(v*m)/m;}, 
-              js_ROUNDDOWN  = (v,c=0)  => {const m = Math.pow(10,c);return Math.floor(v*m)/m;};
+              js_ROUNDDOWN  = (v,c=0)  => {const m = Math.pow(10,c);return Math.floor(v*m)/m;},
+              js_SUBSTITUTE = (text, old_text, new_text, instance_num) => {
+                // SUBSTITUTE(text; old_text; new_text; [instance_num])
+                text = String(text);
+                old_text = String(old_text);
+                new_text = String(new_text);
+
+                if (old_text === '') return text;
+
+                if (instance_num === undefined || instance_num === null) {
+                    // replace all occurrences (case-sensitive)
+                    return text.split(old_text).join(new_text);
+                }
+
+                const inst = Math.floor(Number(instance_num));
+                if (!Number.isFinite(inst) || inst < 1) throw new Error("instance_num must be a positive integer");
+
+                let from = 0;
+                for (let count = 1; ; count++) {
+                    const idx = text.indexOf(old_text, from);
+                    if (idx === -1) break;
+                    if (count === inst) return text.slice(0, idx) + new_text + text.slice(idx + old_text.length);
+                    from = idx + old_text.length;
+                }
+
+                // requested occurrence not found -> retorna texto original
+                return text;
+              },
+              js_REGEXMATCH  = (text, pattern) => {
+                // REGEXMATCH(text; pattern)
+                text = String(text);
+
+                // se já for RegExp, usa direto
+                if (pattern instanceof RegExp) return pattern.test(text);
+
+                pattern = String(pattern);
+
+                // aceita flags inline do tipo (?imsuy) no começo da pattern (mapeia para flags do JS)
+                const fm = /^\(\?([imsuy]+)\)/.exec(pattern);
+                let flags = '';
+                if (fm) {
+                    flags = fm[1].replace(/g/g,''); // remove 'g' se alguém usar (não necessário)
+                    pattern = pattern.slice(fm[0].length);
+                }
+
+                // padrão vazio coincide (como em regex): retorna true
+                if (pattern === '') return true;
+
+                try {
+                    const re = new RegExp(pattern, flags);
+                    return re.test(text);
+                } catch (err) {
+                    throw new Error("Invalid regular expression");
+                }
+        }
+
+;
           //  const js_COT = (v1)       => { return 1 / Math.tan(v1);};        //Declarar função de forma alternativa
           // const js_VALUE = (v1)     => {if (isNaN(parseFloat(v1))) {console.log(`Erro: Não foi possível converter  para um número.`);}return parseFloat(v1);};      //Value
       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
