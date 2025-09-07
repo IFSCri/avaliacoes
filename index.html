@@ -630,11 +630,43 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
                 
 /* ///////////// Impressão//////////////*/		
-        @media print {  
-          body * { visibility: hidden;}
-          #perguntasaqui, #perguntasaqui * {  visibility: visible;   }
-          #perguntasaqui {   position: absolute;    left: 0;  top: 0; }
-        }
+        @media print {
+            /* Regra base para esconder tudo */
+            body * {
+                visibility: hidden;
+            }
+            
+            /* Torna a área da avaliação e seu conteúdo visíveis */
+            #avaliacaoAberta, #avaliacaoAberta * {
+                visibility: visible;
+            }
+
+            /* Configura o layout principal da impressão */
+            #avaliacaoAberta {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none; /* 1. Some com a borda */
+                color: black; /* 2. Deixa o texto padrão em preto */
+            }
+            
+            /* 2. Garante que TODO texto (inclusive de links, etc.) fique preto */
+            #avaliacaoAberta * {
+                color: black !important;
+            }
+
+            /* 3, 4, 5. Some com os elementos indesejados */
+            #submit_button, #solicFB, #whats {
+                display: none;
+            }
+
+            /* 6. Coloca os placeholders em cinza claro */
+            ::placeholder {
+                color: #93ff7d !important; /* Cinza bem claro */
+                opacity: 1; /* Garante a visibilidade em todos os navegadores */
+            }
+            }
 
 /* ///////////// Tabela de tarefas das videoaulas//////////////*/		
         .table-tarefaViAu { border-collapse: collapse;  text-align: center; border: 1px solid #ffffff; height: 475px;margin: 12px;margin-top:10px;}
@@ -767,7 +799,7 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
 </style>
   <meta charset="UTF-8">
-  <title>Lista ezqeu</title>
+  <title>Lista EZQEU</title>
 
 <script src="https://www.youtube.com/iframe_api"></script>  <!-- Chama a API do youtube   -->
 </head>
@@ -1263,15 +1295,23 @@ let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //COR
           const formData = new FormData();
           // É crucial converter o objeto JSON em uma string para enviá-lo corretamente via FormData.
           formData.append('payloadJson', JSON.stringify(jsonParaEnviar));
+
+
+
+
                   
-          const teste = (location.search.slice(1) == "teste"), 
-                back = (teste)?"https://script.google.com/macros/s/AKfycbxBz7h3pmIJll6C_YRgy3wmVz54kuy6cuajYwwSN1PjTSFp4Uo84xiAhT720_XhyMf4/exec":
+        const teste = (location.search.slice(1) == "teste"), 
+              back = (teste)?"https://script.google.com/macros/s/AKfycbxBz7h3pmIJll6C_YRgy3wmVz54kuy6cuajYwwSN1PjTSFp4Uo84xiAhT720_XhyMf4/exec":
                             "https://script.google.com/macros/s/AKfycbxDThRMVCzfJ3OfCsclwMryNiQ5YGHAwxXy5eXYFKOjC4Sk10cKZtFEuLS6ws_xGsctBA/exec";
+                  // Para evitar problemas de cache limpando ele
+        const urlComCacheBust = back + '?timestamp=' + new Date().getTime();
+          
           if(teste) {document.getElementById("controleInicio").style.display = "block";}
 
-        //   console.log(back)
 
-          fetch(back, {
+
+
+          fetch(urlComCacheBust, {
               method: 'POST',
               body: formData
           })
@@ -1776,7 +1816,36 @@ function subirExp(nExp) {
 
 function imprime() { window.print();}
 
+// Função para esconder elementos antes de imprimir
+function prepararImpressao() {
+  // Lista de IDs dos elementos que você quer esconder
+  const idsParaEsconder = ['submit_button', 'solicFB', 'whats','inform','print']; 
+  
+  idsParaEsconder.forEach(id => {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+      elemento.style.display = 'none';
+    }
+  });
+}
 
+// Função para mostrar os elementos novamente depois da impressão
+function finalizarImpressao() {
+  // Mesma lista de IDs
+  const idsParaMostrar = ['submit_button', 'solicFB', 'whats','inform','print'];
+  
+  idsParaMostrar.forEach(id => {
+    const elemento = document.getElementById(id);
+    if (elemento) {
+      // Usar 'block' de volta 
+      elemento.style.display = 'block'; 
+    }
+  });
+}
+
+// Associa suas funções aos eventos de impressão do navegador
+window.onbeforeprint = prepararImpressao;
+window.onafterprint = finalizarImpressao;
 
 
 
@@ -1972,7 +2041,7 @@ function imprime() { window.print();}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////  
 function chamarlista(nlista,turma) { 
 document.getElementById("avaliacaoAberta").innerHTML = `<!----Informações sobre a lista--->
-<div class="information">❔<span class="informationtext">
+<div class="information" id="inform">❔<span class="informationtext">
 ➱ Após o envio será permitida a edição das respostas durante o prazo.<hr>➱ A correção será automática, então atentem à unidade solicitada e realizem os cálculos de forma a obterem valores com boa precisão e possíveis arredondamentos apenas para o valor final.<hr>➱ Quando não especificado um formato para as respostas elas devem ser estritamente numéricas e digitadas "sem a unidade", utilizando "vírgula" como separador decimal (Ex.: 2,99).<hr>➱ Valores em notação científica deverão ser expressos no formato eletrônico. (Ex.: 2,99E+8 em lugar de: 2,99x10⁸).<hr>➱ Quaisquer problemas de submissão devem ser informados em tempo hábil antes do fim do prazo.<hr>➱ Um relatório de submissão de respostas e um feedback de acertos (caso solicitado) serão encaminhados ao seu e-mail institucional.  
 </span></div>
 <sup onclick="imprime()" id="print"><img src="https://i.ibb.co/Wv09HN6/Imprimir.webp" alt="imprimir" style="cursor: pointer;transform: translate(45%, -5%);position: relative;display: inline;width:30px;padding:10;"></sup>
