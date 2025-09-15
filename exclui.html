@@ -4,150 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manter Tela Ligada</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f3f4f6;
-            margin: 0;
-            padding: 1rem;
-        }
-
-        .container {
-            text-align: center;
-            padding: 2rem;
-            background-color: white;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 90%;
-            width: 400px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: #1f2937;
-        }
-
-        p {
-            margin-bottom: 1.5rem;
-            color: #4b5563;
-        }
-
-        .status-message {
-            margin-top: 1.5rem;
-            font-weight: 500;
-            color: #10b981;
-        }
-
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.2s, transform 0.2s;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-        }
-
-        .activate-btn {
-            background-color: #10b981;
-            color: white;
-            border: none;
-        }
-
-        .activate-btn:hover {
-            background-color: #059669;
-        }
-
-        .deactivate-btn {
-            background-color: #ef4444;
-            color: white;
-            border: none;
-        }
-
-        .deactivate-btn:hover {
-            background-color: #dc2626;
-        }
-    </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Controle da Tela</h1>
-        <p>Use os botões abaixo para ativar ou desativar a funcionalidade de manter a tela do celular ligada.</p>
-        <div class="button-group">
-            <button class="activate-btn" onclick="toggleWakeLock(true)">Ativar Wake Lock</button>
-            <button class="deactivate-btn" onclick="toggleWakeLock(false)">Desativar Wake Lock</button>
-        </div>
-        <p id="status-message" class="status-message"></p>
-    </div>
+    <button onclick="toggleWakeLock()">Ativar/Desativar Wake Lock</button>
 
     <script>
-        // Variável global para armazenar a instância do Wake Lock
         let wakeLock = null;
 
-        // Função para solicitar o Wake Lock
-        const requestWakeLock = async () => {
+        async function toggleWakeLock() {
             if ('wakeLock' in navigator) {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                    updateStatus('Wake Lock ativado com sucesso!');
-                } catch (err) {
-                    updateStatus(`Erro ao ativar Wake Lock: ${err.name}, ${err.message}`, true);
+                if (wakeLock) {
+                    // Se já estiver ativado, desativa.
+                    await wakeLock.release();
+                    wakeLock = null;
+                    console.log("Wake Lock desativado.");
+                } else {
+                    // Se estiver desativado, ativa.
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        console.log("Wake Lock ativado com sucesso!");
+                    } catch (err) {
+                        console.error(`Erro ao ativar Wake Lock: ${err.name}, ${err.message}`);
+                    }
                 }
             } else {
-                updateStatus('API Wake Lock não suportada neste navegador.', true);
+                console.log("API Wake Lock não suportada neste navegador.");
             }
-        };
-
-        // Função para liberar o Wake Lock
-        const releaseWakeLock = () => {
-            if (wakeLock) {
-                wakeLock.release();
-                wakeLock = null;
-                updateStatus('Wake Lock desativado.');
-            }
-        };
-
-        // Função para alternar o estado do Wake Lock
-        function toggleWakeLock(shouldActivate) {
-            if (shouldActivate) {
-                requestWakeLock();
-            } else {
-                releaseWakeLock();
-            }
-        } 
-
-        // Função para atualizar a mensagem de status na tela
-        function updateStatus(message, isError = false) {
-            const statusElement = document.getElementById('status-message');
-            statusElement.textContent = message;
-            statusElement.style.color = isError ? '#ef4444' : '#10b981';
         }
 
-        // Adiciona um listener para o evento de visibilidade da página
-        // Isso é importante para reativar o Wake Lock se o usuário voltar para a aba
-        document.addEventListener('visibilitychange', () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                requestWakeLock();
-            }
-        });
+        // Lembre-se: A API Wake Lock é liberada automaticamente ao sair da página.
+        // O código acima atende à sua necessidade de controle manual via botão.
     </script>
 
 </body>
