@@ -829,7 +829,7 @@ input:invalid+b:before {content: '⚠️FORMATO INVÁLIDO!⚠️'; color: #98a32
 
 
     <button  onclick="inicio()">tabela inicial</button>
-    <button  onclick='console.log([localStorage.getItem("autenticador"),localStorage.getItem("google_credential")])' >ver autenticador e token</button> 
+    <button  onclick='console.log([localStorage.getItem("autenticador"),localStorage.getItem("google_credential"),localStorage.getItem("registrarplanilha")])' >ver autenticador e token</button> 
     <button  onclick='const autentic = document.getElementById("autentic").value;localStorage.setItem("autenticador", autentic);' >guardar autenticador</button> 
         <input id="autentic" value="GlMbADwZDRBxES0AQRYGDlhaTBEGQ0kHGkMSAEtIQ34wQ0QoE6SNUVlME1RQ8ohQV0xdW1JSSmE2OD1yRlJZb1VFKUIRq8AEWkVCNQxIEazOH1INAUFvN0wXqsuvxAJATnw=">
     <button  onclick='localStorage.removeItem("autenticador");localStorage.removeItem("google_credential");' >remover autenticador e token</button> 
@@ -1102,12 +1102,12 @@ if (savedCredential) {console.log("Já logado anteriormente!")
 
 function inicio() { 
 
-//   console.log("autenticador: "+ localStorage.getItem('autenticador')+"\ntoken: "+ localStorage.getItem('google_credential'))
+  //console.log("autenticador: "+ localStorage.getItem('autenticador')+"\ntoken: "+ localStorage.getItem('google_credential'))
 
-  let autenticador = localStorage.getItem('autenticador'),token = localStorage.getItem('google_credential'),usuario = location.search.slice(1);
+  let autenticador = localStorage.getItem('autenticador'),token = localStorage.getItem('google_credential'),usuario;
   
   enviarArray(  
-    function(tabelaDadosQEA){        //  console.log("tabelaDadosQEA: "+tabelaDadosQEA);
+    function(tabelaDadosQEA){          //console.log("tabelaDadosQEA: "+tabelaDadosQEA);
       if(tabelaDadosQEA){telaInicial(tabelaDadosQEA);
       document.getElementById("deixarSessao").style.display = "block";
       document.getElementById("botaoLogin").style.display = "none";
@@ -1127,9 +1127,8 @@ function inicio() {
 ///////////////////////////
       }
 
-      
-          localStorage.setItem("autenticador", tabelaDadosQEA[8]);  //Registra o autenticador atualizado no navegador
-      
+          localStorage.setItem("autenticador", tabelaDadosQEA[9]);  //Registra o autenticador atualizado no navegador
+          localStorage.setItem("registrarplanilha", tabelaDadosQEA[8]);  //Salva registros na planilha
     }
   ).autenticacaoInicial(autenticador,usuario || token);
 
@@ -1181,7 +1180,7 @@ function telaInicial(tabelaDadosQEA) {//
   if (tabelaDadosQEA.length == 1){ document.getElementById('identificacao').innerHTML = tabelaDadosQEA   }
   else{
 
-    if (tabelaDadosQEA[7]){    iniciarQEA(tabelaDadosQEA[7]);  }
+    if (tabelaDadosQEA[7]){    iniciarQEA(tabelaDadosQEA[7]); manterTelaLigada(true);  }
 
     /*
     ///////////////////////////////////////SUMIR ANIMAÇÃO DE CARREGAMENTO//////////////////////////////////////
@@ -1276,7 +1275,7 @@ function enviarArray(funcaoQueRecebeDeVolta) {//alert(funcaoQueRecebeDeVolta)
 //console.log("Dados Enviados Do HTML: "+dadosDoHTML)
 //////////id: se não tiver "id_token" do Google envia do link "https://www.......?padrao" o texto: "padrao".
 let usuario = window.id_token || location.search.slice(1)/* || "padrao"*/; //CORRIGIR: excluir opção "padrao"
-		    let jsonParaEnviar = { tipo: funcao, dados: dadosDoHTML, id:  usuario, autenticador: localStorage.getItem('autenticador')  };
+		    let jsonParaEnviar = { tipo: funcao, dados: dadosDoHTML, id:  usuario, autenticador: localStorage.getItem('autenticador'), registrarplanilha: localStorage.getItem('registrarplanilha')  };
 //console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
 		//document.getElementById('output').innerText = JSON.stringify(jsonParaEnviar);
 		
@@ -1578,15 +1577,33 @@ function avaliarQEA(){  // google.script.run.withSuccessHandler(  function(m){  
 
 
 
-
-    
-
-
-
-
-
 }
 
+
+
+
+
+        let wakeLock = null;
+        async function manterTelaLigada(shouldActivate) {
+            if ('wakeLock' in navigator) {
+                if (shouldActivate) {
+                    try {
+                        wakeLock = await navigator.wakeLock.request('screen');
+                        // console.log("Wake Lock ativado com sucesso!");
+                    } catch (err) {
+                        console.error(`Erro ao ativar Wake Lock: ${err.name}, ${err.message}`);
+                    }
+                } else {
+                    if (wakeLock) {
+                        await wakeLock.release();
+                        wakeLock = null;
+                        // console.log("Wake Lock desativado.");
+                    }
+                }
+            } else {
+                console.log("API Wake Lock não suportada neste navegador(a tela não vai ser mantida ligada)");
+            }
+        }
 </script>
 
 
