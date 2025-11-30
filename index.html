@@ -1276,7 +1276,7 @@ function enviarArray(funcaoQueRecebeDeVolta) {//alert(funcaoQueRecebeDeVolta)
 //////////id: se não tiver "id_token" do Google envia do link "https://www.......?padrao" o texto: "padrao".
 let usuario = window.id_token || location.search.slice(1);
 		    let jsonParaEnviar = { tipo: funcao, dados: dadosDoHTML, id:  usuario, autenticador: localStorage.getItem('autenticador'), registrarplanilha: localStorage.getItem('registrarplanilha')  };
-//console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
+console.log("jsonParaEnviar: "+JSON.stringify(jsonParaEnviar))
 		//document.getElementById('output').innerText = JSON.stringify(jsonParaEnviar);
 		
 		
@@ -3514,6 +3514,9 @@ document.addEventListener('keydown', function(event) {
 
   // Placeholder: converte funções de planilha para JS
 function funcaoSheetToJS(eqSheet   /*,indice*/){                      //console.log("funcaoSheetToJS");
+
+     // CORREÇÃO AQUI: Resolve "2--4" para "2+4" antes de tudo
+    eqSheet = eqSheet.replace(/-\s*-/g, '+');
 
     //Transforma em texto a equação e substitui "," por "." || ";" por "," ||"=" por "==" ||"&" por "+" || "<>" por "!="
     var eqSheetSemParen = String(eqSheet).replaceAll(/(\d),(\d)|(\w*)%|;|TRUE|FALSE|=|\^|&|<>/g, (match, p1, p2, p3) => {
