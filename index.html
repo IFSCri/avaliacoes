@@ -2421,7 +2421,7 @@ var videoSelecionado = "",videoDuration = 1;; //Para funções modificarem, acho
           <h2 id='titulo' style="/* display: block; */text-align: center;"></h2>
           <div id="viAu">
             <div id='videoPlayer'></div>
-	            <div id='playpause' onclick='playpauseVideo(this.getAttribute(\"estadovideo\"))' estadovideo='Iniciar' style='padding: 15px;background-color:transparent;word-break: break-word;display:none;'><img  width='100' alt='Reproduzir Vídeo' src='https://i.ibb.co/ZKkB61b/Play-video.png'>
+	            <div id='playpause' onclick='playpauseVideo(this.getAttribute(\"estadovideo\"))' estadovideo='Iniciar' style='padding: 15px;background-color:transparent;word-break: break-word;display:none;'><img  width='100' alt='Reproduzir Vídeo' src='https://i.ibb.co/ZKkB61b/Play-video.png' style='display: block; margin: 0 auto;'>
               </div>
           </div>
   
@@ -2993,7 +2993,7 @@ document.addEventListener('keydown', function(event) {
 			    playpause.style.backgroundColor ="#172618";
           //Object.assign(playpause.style, {"background-color": "blue"});
 			    playpause.setAttribute('estadovideo', 'Reproduzir');
-          playpause.innerHTML = "<img width='100' alt='Reproduzir Vídeo' src='https://i.ibb.co/ZKkB61b/Play-video.png'>";
+          playpause.innerHTML = "<img width='100' alt='Reproduzir Vídeo' src='https://i.ibb.co/ZKkB61b/Play-video.png' style='display: block; margin: 0 auto;'>";
           // playpause.innerHTML = "Reproduzir vídeo";
           break;
 
