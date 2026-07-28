@@ -1117,20 +1117,18 @@
                   // perguntaAula.innerHTML = a[0];
                   // perguntaAula.setAttribute("var", a[1]);
 
-                  function iniciarQEA(a){//console.log("a do QEA: "+a[1])
-                    if(a!=false){
-                      a = a.split("𢆯")
+                  function iniciarQEA(a){ console.log("a do QEA: ",a)
+                      // a = a.split("𢆯");
                       document.getElementById('questaoEmAula').outerHTML = `
                       <div id="questaoEmAula" style="padding: 44px;background: #559898;border-radius: 45px 30px 104px 104px;font-size: 28px;line-height: 1.5em;text-align: center;border: 15px solid #ffffff;">  
-                      <h1 style="text-align: center;">Questão ` + a[3] + `</h1>
                       <img id= "updateQEA" src="https://i.ibb.co/qpS8vNH/Update.png" alt="Atualizar" onclick="atualizarQEA();">
                     <button id="submitQEA" style="right: 20px;position: absolute;height: 59px;cursor: pointer;color: #006969;background-color: #07e7e7;border-color: #ffffff;border-radius: 14px;min-width: 209px;margin-left: 5px;font-size: 23px;top: 80px;font-family: ui-monospace;font-weight: bolder;" onclick="avaliarQEA()">ENVIAR RESPOSTA
-                    <div id="prazoQEA" style="color: yellow;font-size: 15px;">(Envio até ` + a[4].replace(/(\w+) (\w+) (\w+) (\w+) (.*?) (.*?)$/, '$5') + `)<span id="faltamQEA" style="color:red;"></span></div>
+                    <div id="prazoQEA" style="color: yellow;font-size: 15px;">(Envio até ` + new Date(a[4]).toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour12: false }) + `)<span id="faltamQEA" style="color:red;"></span></div>
                     </button>
                     <span id="notaQEA"></span>
-                      <div>AULA: "` + a[2].replace(/\.pptx/,"")+ `"<br>
-                        <b style="font-size: 13px;color:yellow;">⚠️ AO SAIR DA PÁGINA A QUESTÃO SERÁ ALTERADA ⚠️</b></div>
-                      <div id="perguntaAula" style="padding: 16px;text-align: left;">` + a[0] + `</div>   
+                        <h6>AULA: "` + a[2] + `". <b style="font-size: 13px;color:yellow;">⚠️ AO SAIR DA PÁGINA A QUESTÃO SERÁ ALTERADA ⚠️</b></h6>
+                        <h2>QUESTÃO</h2>
+                      <div id="perguntaAula" style="padding: 16px;text-align: left;">` + a[0].replaceAll(/,⦅££🠚.*⦆/g,"") + `</div>   
                     </div>
                       `;
                     document.getElementById('asnotas').setAttribute("varQEA", a[1]);   //Atualizar variáveis
@@ -1177,7 +1175,7 @@
                         } });
                   
                   
-                  }
+                  
                   }
 
 
@@ -1197,15 +1195,15 @@
                   //Antes: google.script.run.withSuccessHandler
                   enviarArray(  function(m){          //console.log((m.split('𢆯'))[0]);
                       if(m){
-                        var zzz = m.split('𢆯');
-                        document.getElementById('perguntaAula').innerHTML = zzz[0];  //Atualizar pergunta
+                        // var zzz = m.split('𢆯');
+                        document.getElementById('perguntaAula').innerHTML = m[0].replaceAll(/,⦅££🠚.*⦆/g,"");  //Atualizar pergunta
                         document.getElementById("perguntaAula").setAttribute("style","padding: 16px; text-align: left; pointer-events:auto; opacity: 1.0;")
-                        document.getElementById('asnotas').setAttribute("varQEA", zzz[1]);   //Atualizar variáveis
+                        document.getElementById('asnotas').setAttribute("varQEA", m[1]);   //Atualizar variáveis
                         document.getElementById('questaoEmAula').style.display = "block";
                       }else{document.getElementById('questaoEmAula').style.display = "none"; }
                   
                       updateQEA.classList.remove('rotating');
-                      }).puxarQEA([turma,e_mail,nome,row_al]); 
+                      }).puxarQEA(turma,e_mail,nome,row_al); 
                   }
                   
                   //Basicamente só colado aqui (exceto primeiras linhas):
