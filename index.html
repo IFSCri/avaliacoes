@@ -77,7 +77,7 @@
          .information{position:relative;float:left;display:inline-block;font-size:18px;padding-left:1px;cursor: help;}
          .information .informationtext {visibility:hidden;width:530px;background-color:#555;color: #fff;text-align: justify;border-radius:6px;padding:5px 10px;font-size:13px;position:absolute;z-index:1;top: 27px;left:75px;margin-left:-60px;opacity:0;transition:opacity 1.0s;}
          .information:hover .informationtext{visibility:visible;opacity:1;}
-         .inputes, .inputesVD, .inputesQEA {
+         .inputes, .inputesVD, .inputesQEA, .inputesProvOn {
          background:rgba(255, 255, 255, 0.8);
          font-weight: bold;
          text-align:center;
@@ -621,6 +621,73 @@
             <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->*/
          .par { cursor: pointer; }
          .highlight { background-color: yellow; }
+
+
+
+
+
+
+
+
+
+
+
+         /*<!-- >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+            >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>  Prova Online  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+            <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->*/
+
+
+          /* Todas as tabelas */
+          #perguntaAula .tableProvOn{
+              width: 100%;
+              margin: 0 0 24px;
+              border-collapse: collapse;
+              table-layout: fixed;
+              background: transparent;
+              border: 1px solid #cfcfcf;
+              border-radius: 10px;
+              overflow: hidden;
+              box-shadow: 0 2px 10px rgba(0,0,0,.06);
+          }
+
+          /* Cabeçalho */
+          #perguntaAula .tableProvOn th{
+              background: rgba(0,0,0,.04);
+              padding: 12px 16px;
+              font-size: 1.1em;
+              font-weight: 600;
+              text-align: left;
+              border-bottom: 1px solid #d8d8d8;
+
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+          }
+
+          /* Botão do cabeçalho */
+          #perguntaAula .tableProvOn th>button{
+              margin-left: auto;
+              padding: 8px 18px;
+              border: none;
+              border-radius: 6px;
+              background: #1f6fd8;
+              color: #fff;
+              font-size: .88rem;
+              font-weight: 600;
+              cursor: pointer;
+              transition: .18s;
+              white-space: nowrap;
+          }
+
+          #perguntaAula .tableProvOn th>button:hover{
+              background: #185ab0;
+          }
+
+          #perguntaAula .tableProvOn th>button:active{
+              transform: scale(.98);
+          }
+
       </style>
       <meta charset="UTF-8">
       <title>Avaliações de física</title>
@@ -1041,15 +1108,16 @@
                             back = (teste)?"https://script.google.com/macros/s/AKfycbxBz7h3pmIJll6C_YRgy3wmVz54kuy6cuajYwwSN1PjTSFp4Uo84xiAhT720_XhyMf4/exec":
                                           "https://script.google.com/macros/s/AKfycbxDThRMVCzfJ3OfCsclwMryNiQ5YGHAwxXy5eXYFKOjC4Sk10cKZtFEuLS6ws_xGsctBA/exec";
                                 // Para evitar problemas de cache limpando ele
-                      const urlComCacheBust = back + '?timestamp=' + new Date().getTime();
+                      //Tava dando erro, eu acho //const urlComCacheBust = back + '?timestamp=' + new Date().getTime();
                         
                         if(teste) {document.getElementById("controleInicio").style.display = "block";}
                   
                   
                   
                   
-                        fetch(urlComCacheBust, {
+                        fetch(back, {
                             method: 'POST',
+                            /* mode: 'cors', */
                             body: formData
                         })
                         .then(response => {
@@ -1321,9 +1389,13 @@
                       a = a.split("𢆯")
                       document.getElementById('questaoEmAula').outerHTML = 
                     `<div id="questaoEmAula" style="padding: 44px;background: #1c2e2e;border-radius: 45px 30px 104px 104px;font-size: 28px;line-height: 1.5em;text-align: center;border: 15px solid #ffffff;">  
-                    <button id="submitProvOn" style="right: 20px;position: absolute;height: 59px;cursor: pointer;color: #006969;background-color: #07e7e7;border-color: #ffffff;border-radius: 14px;min-width: 209px;margin-left: 5px;font-size: 23px;top: 80px;font-family: ui-monospace;font-weight: bolder;" onclick="avaliarProvOn()">ENVIAR RESPOSTA
+                    
+                    <!-- Antigo botão único de submeter respostas -->
+                    <span id="submitProvOn" style="color: #006969;background-color: #07e7e7;border-radius: 14px;font-size: 23px;font-family: ui-monospace;font-weight: bolder;">Informação de tempo
                     <div id="prazoProvOn" style="color: yellow;font-size: 15px;">(Envio até ` + a[4].replace(/(\w+) (\w+) (\w+) (\w+) (.*?) (.*?)$/, '$5') + `)<span id="faltamProvOn" style="color:red;"></span></div>
-                    </button>
+                    </span>
+
+
                     <span id="notaProvOn"></span>
                     <h1 style='text-align:center;'>Prova </h1>
                     ( 0 - ` + a[3] + ` )<br>
@@ -1434,19 +1506,20 @@
 
 
                   //Basicamente só colado aqui (exceto primeiras linhas):
-                  function avaliarProvOn(){  // google.script.run.withSuccessHandler(  function(m){     alert(m)      }).corrigirProvOn(); 
-                      var resposta = capturar("inputesProvOn").join("");                      //   console.log(resposta);
+                  function avaliarProvOn(assuntoID,variaveisProvOn){  // google.script.run.withSuccessHandler(  function(m){     alert(m)      }).corrigirProvOn(); 
+                      var resposta = capturar(assuntoID).join("");     
+                  console.log(assuntoID,variaveisProvOn)                 //   console.log(resposta);
                       var row_al = parseInt(document.getElementById("armazem").getAttribute("row_al"));
                    // var nRow = parseInt(document.getElementById("asnotas").getAttribute("nRow"));  //  console.log(nRow);//alert(nColVD);
                       var nPergunta = parseInt(document.getElementById("asnotas").getAttribute("nProvOn"));             //    console.log(nPergunta);
-                      var variaveis = document.getElementById("asnotas").getAttribute("varProvOn");               // console.log(variaveis);
+                      var variaveis = variaveisProvOn || document.getElementById("asnotas").getAttribute("varProvOn");               // console.log(variaveis);
                       var turma = document.getElementById("avaliacaoAberta").getAttribute("turma"),             
                         mail = document.getElementById("verEMail").innerHTML;                  // console.log(turma);  console.log(mail);
                       //Exibir animação de espera
                       notificacao('animacao',['https://cdn.pixabay.com/animation/2023/08/15/07/22/07-22-02-443_512.gif',250,15]);
                       //////////////Deixar o mouse em carregamento até voltar a correção///////////////
                       //document.getElementById("questaoEmAula").style.cursor = "wait";
-                  
+                  console.log("resposta: "+resposta+" | row_al: "+row_al+" | variaveis: "+variaveis)
                       //////////////ENVIAR RESPOSTAS PARA CORREÇÃO///////////////
                       //google.script.run.withSuccessHandler
                       enviarArray(function(feedback){         // alert("Tamanho: "+feedback[2].length);
@@ -1486,7 +1559,7 @@
                             notificacao('aviso',['O prazo de envio expirou','',10]);
                             document.getElementById("perguntaAula").setAttribute("style","padding: 16px; text-align: left; pointer-events: none; opacity: 0.2;")
                           }
-                      }).corrigirPergProvOn(row_al,resposta,variaveis);
+                      }).corrigirProvOn(row_al,resposta,variaveis,assuntoID);
                   
                   
                   
