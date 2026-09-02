@@ -85,6 +85,14 @@
          /* color:rgba(100, 150, 90, 1); */
          border-radius: 5px;
          }
+
+        /* Impede formatação no autopreenchimento dos inputes */
+.inputesProvOn:-webkit-autofill,
+.inputesProvOn:-webkit-autofill:hover,
+.inputesProvOn:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+    -webkit-text-fill-color: inherit !important;
+}
          /* .peso {
          padding-right: 5px;
          padding-left: 5px;
@@ -643,7 +651,7 @@
               margin: 0 0 24px;
               border-collapse: collapse;
               table-layout: fixed;
-              background: transparent;
+              background: rgba(250, 250, 250, 0.1);
               border: 1px solid #cfcfcf;
               border-radius: 10px;
               overflow: hidden;
@@ -1469,7 +1477,8 @@
                       });
                       /////////////////////////////////////////////////////////////////////////
 
-
+                      //Imprede a sugetão automática de valores que oculta a formatação do input, que é importante para o feedback de cores
+                      document.querySelectorAll('table.tableProvOn input').forEach(el => { el.setAttribute('autocomplete', 'off');      });
                     }
                 }
 
@@ -1498,6 +1507,8 @@
                       }else{document.getElementById('questaoEmAula').style.display = "none"; }
                   
                       }).puxarProvOn([turma,e_mail,nome,row_al]); 
+
+
                   }
                   
 
@@ -1506,38 +1517,71 @@
 
 
                   //Basicamente só colado aqui (exceto primeiras linhas):
-                  function avaliarProvOn(assuntoID,variaveisProvOn){  // google.script.run.withSuccessHandler(  function(m){     alert(m)      }).corrigirProvOn(); 
-                      var resposta = capturar(assuntoID).join("");     
-                  console.log(assuntoID,variaveisProvOn)                 //   console.log(resposta);
+                  function avaliarProvOn(assuntoID,tabela){  // google.script.run.withSuccessHandler(  function(m){     alert(m)      }).corrigirProvOn(); 
+//  localStorage.setItem("registrarplanilha", true);
+                    var resposta = capturar("inputesProvOn_" + assuntoID).join("");   
+                    let numerosQuestResp = [...resposta.matchAll(/⦅(\d+)🠚/g)].map(m => m[1]); 
+
+                  // console.log(assuntoID,variaveisProvOn)                 //   console.log(resposta);
                       var row_al = parseInt(document.getElementById("armazem").getAttribute("row_al"));
                    // var nRow = parseInt(document.getElementById("asnotas").getAttribute("nRow"));  //  console.log(nRow);//alert(nColVD);
                       var nPergunta = parseInt(document.getElementById("asnotas").getAttribute("nProvOn"));             //    console.log(nPergunta);
-                      var variaveis = variaveisProvOn || document.getElementById("asnotas").getAttribute("varProvOn");               // console.log(variaveis);
+                               
+                      // var variaveis = variaveisProvOn || document.getElementById("asnotas").getAttribute("varProvOn");               // console.log(variaveis);
+                      // console.log("Todas as variáveis: ",document.getElementById("asnotas").getAttribute("varProvOn"));               // console.log(variaveis);
+                      var variaveis = [...tabela.querySelectorAll("[data-var]")].map(el => el.dataset.var).join("") || document.getElementById("asnotas").getAttribute("varProvOn");  
+                      // console.log("variaveis do " + assuntoID + ": ",variaveis)
+
                       var turma = document.getElementById("avaliacaoAberta").getAttribute("turma"),             
                         mail = document.getElementById("verEMail").innerHTML;                  // console.log(turma);  console.log(mail);
                       //Exibir animação de espera
                       notificacao('animacao',['https://cdn.pixabay.com/animation/2023/08/15/07/22/07-22-02-443_512.gif',250,15]);
                       //////////////Deixar o mouse em carregamento até voltar a correção///////////////
                       //document.getElementById("questaoEmAula").style.cursor = "wait";
-                  console.log("resposta: "+resposta+" | row_al: "+row_al+" | variaveis: "+variaveis)
+                  console.log("variaveis do " + assuntoID + ": \n","resposta: "+resposta+"\nrow_al: "+row_al+"\nvariaveis: "+variaveis)
                       //////////////ENVIAR RESPOSTAS PARA CORREÇÃO///////////////
                       //google.script.run.withSuccessHandler
+
+/* 
+
+
+console.log(row_al,resposta,variaveis)
+
+    row_al=9//,respostas="⦅01🠚id{Q}🠖60,94736⦆",variaveis="⦅01🠚SS🠖19,3⦆⦅01🠚tt🠖19⦆",assunto="AssuntoI(1,5)";
+    variaveis = '⦅01🠚SS🠖19,3⦆⦅01🠚tt🠖19⦆⦅02🠚a1🠖"pizza"⦆⦅02🠚a2🠖"cilíndrica"⦆⦅02🠚b1🠖"galo"⦆⦅02🠚b2🠖""⦆⦅02🠚b3🠖"3"⦆⦅02🠚c1🠖"2"⦆';
+    resposta = '⦅01🠚id{Q}🠖60,947368421⦆⦅02🠚id{e}🠖"false"⦆⦅02🠚id{d}🠖"true"⦆⦅02🠚id{c}🠖"false"⦆⦅02🠚id{b}🠖"false"⦆⦅02🠚id{a}🠖"false"⦆';
+
+console.log(row_al,resposta,variaveis)
+
+ */
+
+
+
+
+
+
                       enviarArray(function(feedback){         // alert("Tamanho: "+feedback[2].length);
-                  
+console.log("feedback: ",feedback)
                           if(feedback){
                             ////////////////////////////////////////COLORIR COM FEEDBACK//////////////////////////////////////
-                          feedback[2].forEach(       
-                            function(fb){    // console.log("ProvOn🠚id{"+fb[0]+"}")// alert("fb[1]: "+fb[1]);   
-                              switch (fb[1]) { 
-                                    case "✅":  
-                                      document.getElementById("ProvOn🠚id{"+fb[0]+"}").style.background = "#dbffaf";
-                                    break;
-                                    case "❌": 
-                                      document.getElementById("ProvOn🠚id{"+fb[0]+"}").style.background = "#ffcccc";
-                                    break;
-                                    default: 
-                                      document.getElementById("ProvOn🠚id{"+fb[0]+"}").style.background = "rgba(255, 255, 255, 0.8)";
-                                    break;
+                          feedback[1].forEach(       
+                            function(fb,i){     
+                              for(let j=0;j<fb[2].length;j++){
+                                console.log("ID: ",numerosQuestResp[i]+"🠚id{"+fb[2][j][0]+"}")// alert("fb[1]: "+fb[1]); 
+                                console.log("Resultado: ",fb[2][j][1])// alert("fb[1]: "+fb[1]); 
+                                let elemColor = document.getElementById(numerosQuestResp[i]+"🠚id{"+fb[2][j][0]+"}"); 
+                                 console.log("Elemento a colorir: ",elemColor.outerHTML)
+                                switch (fb[2][j][1]) { 
+                                      case "✅":  
+                                        elemColor.style.background = "#dbffaf";
+                                      break;
+                                      case "❌": 
+                                        elemColor.style.background = "#ffcccc";
+                                      break;
+                                      default: 
+                                        elemColor.style.background = "rgba(255, 255, 255, 0.8)";
+                                      break;
+                                }
                               }
                             }
                           )
@@ -2159,7 +2203,14 @@
              else{fb.innerHTML = fbFree;              };	 
          }  
          
-         document.getElementsByClassName("linkint").addEventListener("click", function (){clearInterval(contador)} );
+        // Event listener global por delegação (funciona antes e depois da chegada do GAS)
+         document.addEventListener("click", function (event) {
+           if (event.target && event.target.classList.contains("linkint")) {
+             if (typeof contador !== "undefined") {
+               clearInterval(contador);
+             }
+           }
+         });
          
          
          
