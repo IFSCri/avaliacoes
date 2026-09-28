@@ -1251,23 +1251,33 @@
                             console.error('Erro ao enviar os dados:', error);
                             mensagemRespostaDiv.innerHTML = `Erro na comunicação: ${error.message}`;
                             // if (confirm("Ocorreu um erro de carregamento.\n\nRecarregue a página.")) { location.reload(); }
+                            
                             let segundos = 2;
                             const identificacao = document.getElementById("identificacao");
 
+                            identificacao.innerHTML = `
+                                <h1>Ocorreu um erro de carregamento.<br><br>
+                                A página será recarregada em <span id="contadorReload">${segundos}</span> segundos.</h1>
+                                <button id="cancelarReload" type="button">Cancelar</button>
+                            `;
+
+                            const contador = document.getElementById("contadorReload");
+                            const botaoCancelar = document.getElementById("cancelarReload");
+
                             const timer = setInterval(() => {
-                                identificacao.innerHTML = `<h1>Ocorreu um erro de carregamento.<br><br>
-                                A página será recarregada em ${segundos} segundo${segundos !== 1 ? 's' : ''}.</h1>`;
+                                segundos--;
+                                contador.textContent = segundos;
 
                                 if (segundos <= 0) {
                                     clearInterval(timer);
                                     location.reload();
                                 }
-
-                                segundos--;
                             }, 1000);
 
-                            identificacao.innerHTML = `<h1>Ocorreu um erro de carregamento.<br><br>
-                            A página será recarregada em ${segundos} segundos.</h1>`;
+                            botaoCancelar.onclick = () => {
+                                clearInterval(timer);
+                                identificacao.innerHTML = "<h1>Recarregamento cancelado.</h1>";
+                            };
                         });
                   
                   
